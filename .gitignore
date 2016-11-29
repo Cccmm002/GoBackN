@@ -1,0 +1,5 @@
+*.txt
+*.pyc
+aws/*
+__pycache__/*
+
