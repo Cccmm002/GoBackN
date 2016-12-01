@@ -82,8 +82,8 @@ if __name__ == '__main__':
     # _window = search_window(0, -1, 64, _server, _port, 64, _packet_size, _timeout, _packets)
     # print('Best window size is found It is {0} packets'.format(int(_window)))
 
-    windows = [4, 8, 16, 32, 64, 128, 256, 512, 1024]
-    # windows = [128, 256, 512]   # for test purpose
+    windows = [4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048]
+    # windows = [256, 512, 1024]   # for test purpose
     total_window = len(windows)
     throughputs = []
     throughputs_err = []

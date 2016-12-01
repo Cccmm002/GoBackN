@@ -19,6 +19,13 @@ def packets_prepare(packet_size, file_name):
     return packets
 
 
+def trysend(sock, content, server, port):
+    try:
+        sock.sendto(content, (server, port))
+    except OSError:
+        pass
+
+
 def client(server, server_port, window_size, timeout, packet_size, packets):
     start_time = time.time()
 
@@ -50,7 +57,8 @@ def client(server, server_port, window_size, timeout, packet_size, packets):
             if next_packet >= total_packets:
                 break
             window.append(packets[next_packet])
-            sock.sendto(packets[next_packet].encode(), (server, server_port))
+            # sock.sendto(packets[next_packet].encode(), (server, server_port))
+            trysend(sock, packets[next_packet].encode(), server, server_port)
             packets_sent += 1
             next_packet += 1
         try:
@@ -69,12 +77,14 @@ def client(server, server_port, window_size, timeout, packet_size, packets):
                         i += 1
         except socket.timeout:
             for i in range(len(window)):
-                sock.sendto(window[i].encode(), (server, server_port))
+                # sock.sendto(window[i].encode(), (server, server_port))
+                trysend(sock, window[i].encode(), server, server_port)
                 packets_sent += 1
             continue
     print()
     time_used = float(time.time() - start_time)
     print('Complete! Time used: {0} seconds.'.format(time_used))
+    sock.close()
     return time_used, packets_sent - total_packets, packet_size*(packets_sent - total_packets)
 
 
