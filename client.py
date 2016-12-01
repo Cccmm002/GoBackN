@@ -44,12 +44,14 @@ def client(server, server_port, window_size, timeout, packet_size, packets):
     print('Server ACKed. Start sending KJV Bible with packet size: {0}B, window size: {1} and timeout: {2} seconds.'
           .format(packet_size, window_size, timeout))
 
+    packets_sent = 0
     while next_packet < total_packets or (not len(window) == 0):
         while len(window) < window_size:
             if next_packet >= total_packets:
                 break
             window.append(packets[next_packet])
             sock.sendto(packets[next_packet].encode(), (server, server_port))
+            packets_sent += 1
             next_packet += 1
         try:
             data, addr = sock.recvfrom(4)
@@ -68,11 +70,12 @@ def client(server, server_port, window_size, timeout, packet_size, packets):
         except socket.timeout:
             for i in range(len(window)):
                 sock.sendto(window[i].encode(), (server, server_port))
+                packets_sent += 1
             continue
     print()
     time_used = float(time.time() - start_time)
     print('Complete! Time used: {0} seconds.'.format(time_used))
-    return time_used
+    return time_used, packets_sent - total_packets, packet_size*(packets_sent - total_packets)
 
 
 if __name__ == '__main__':

@@ -9,15 +9,22 @@ def server(port, packet_size):
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 64*1024)
     sock.settimeout(10)  # if more than 20 seconds without any message get in, restart
 
+    total_packets = -1
+
     while True:
         try:
-            pdata, paddr = sock.recvfrom(packet_size)
-            prep = decode(pdata)
-            if not prep.flag == 'P':
-                continue
-            pa = Packet('A', prep.pid, [])
-            sock.sendto(pa.encode(), paddr)
-            total_packets = pa.pid
+            while True:
+                pdata, paddr = sock.recvfrom(packet_size)
+                prep = decode(pdata)
+                if not prep.flag == 'P':
+                    if total_packets > 0:
+                        ppla = Packet('A', total_packets - 1, [])
+                        sock.sendto(ppla.encode(), paddr)
+                else:
+                    pa = Packet('A', prep.pid, [])
+                    sock.sendto(pa.encode(), paddr)
+                    total_packets = pa.pid
+                    break
             front = -1
             data_book = ''
             print('Start to receive packets.')
@@ -30,13 +37,15 @@ def server(port, packet_size):
                         front += 1
                         data_book += cur_pack.data.decode('ascii')
                         print('{0} / {1} packets received.'.format(cur_pack.pid + 1, total_packets), end='\r'),
-                    ack = Packet('A', front, [])
-                    sock.sendto(ack.encode(), addr)
+                    if front >= 0:
+                        ack = Packet('A', front, [])
+                        sock.sendto(ack.encode(), addr)
                 elif cur_pack.flag == 'P':
                     sock.sendto(pa.encode(), paddr)
 
             print()
             print('Complete!')
+            prev_pack_len = total_packets
             f = open('data.txt', 'w')
             f.write(data_book)
         except socket.timeout:
