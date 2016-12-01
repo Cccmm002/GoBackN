@@ -4,4 +4,5 @@ aws/*
 __pycache__/*
 .idea/*
 .DS_Store
+*.csv
 
