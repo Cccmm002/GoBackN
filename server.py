@@ -45,7 +45,6 @@ def server(port, packet_size):
 
             print()
             print('Complete!')
-            prev_pack_len = total_packets
             f = open('data.txt', 'w')
             f.write(data_book)
         except socket.timeout:
